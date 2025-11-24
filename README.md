@@ -1,4 +1,4 @@
-# InvestTracker
+# InvestTrack
 
 A comprehensive investment management system with Monte Carlo simulation, backtesting capabilities, and real-time market data integration.
 
@@ -37,19 +37,19 @@ A comprehensive investment management system with Monte Carlo simulation, backte
 ## Project Structure
 
 ```
-investtracker/
+invest-track/
   backend/
     src/
       main/
         java/
-          com/investtracker/
+          com/github/hnrdejesus/invest_track/
             config/
             controller/
             domain/
             dto/
             repository/
             service/
-            InvestTrackerApplication.java
+            InvestTrackApplication.java
         resources/
           application.yml
           application-dev.yml
@@ -73,8 +73,8 @@ investtracker/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/investtracker.git
-cd investtracker
+git clone https://github.com/hnrdejesus/invest-track.git
+cd invest-track
 ```
 
 2. Configure database in `backend/src/main/resources/application-dev.yml`
@@ -147,7 +147,7 @@ ALPHA_VANTAGE_API_KEY=your_key_here
 YAHOO_FINANCE_API_KEY=your_key_here
 
 # Database
-spring.datasource.url=jdbc:postgresql://localhost:5432/investment_db
+spring.datasource.url=jdbc:postgresql://localhost:5432/investtrack_dev
 spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```

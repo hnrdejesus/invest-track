@@ -13,7 +13,7 @@
 	<groupId>com.github.hnrdejesus</groupId>
 	<artifactId>invest-track</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>invest-track</name>
+	<name>InvestTrack</name>
 	<description>Personal Investment Management System with Monte Carlo Simulation.</description>
 
 	<properties>
