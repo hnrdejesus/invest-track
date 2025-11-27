@@ -1,6 +1,7 @@
 package com.github.hnrdejesus.invest_track.service;
 
 import com.github.hnrdejesus.invest_track.domain.Portfolio;
+import com.github.hnrdejesus.invest_track.exception.ResourceNotFoundException;
 import com.github.hnrdejesus.invest_track.repository.PortfolioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,6 @@ public class PortfolioService {
      */
     @Transactional
     public Portfolio createPortfolio(String name, String description, BigDecimal initialCash) {
-
         log.info("Creating portfolio: {}", name);
 
         if (portfolioRepository.existsByNameIgnoreCase(name)) {
@@ -52,7 +52,7 @@ public class PortfolioService {
      */
     public Portfolio getPortfolioById(Long id) {
         return portfolioRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Portfolio not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio", id));
     }
 
     /**
@@ -61,7 +61,7 @@ public class PortfolioService {
      */
     public Portfolio getPortfolioWithPositions(Long id) {
         return portfolioRepository.findByIdWithPositions(id)
-                .orElseThrow(() -> new IllegalArgumentException("Portfolio not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio", id));
     }
 
     /**
@@ -77,7 +77,6 @@ public class PortfolioService {
      */
     @Transactional
     public Portfolio updatePortfolio(Long id, String name, String description) {
-
         log.info("Updating portfolio ID: {}", id);
 
         Portfolio portfolio = getPortfolioById(id);
@@ -100,7 +99,6 @@ public class PortfolioService {
      */
     @Transactional
     public Portfolio depositCash(Long portfolioId, BigDecimal amount) {
-
         log.info("Depositing {} to portfolio ID: {}", amount, portfolioId);
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -120,7 +118,6 @@ public class PortfolioService {
      */
     @Transactional
     public Portfolio withdrawCash(Long portfolioId, BigDecimal amount) {
-
         log.info("Withdrawing {} from portfolio ID: {}", amount, portfolioId);
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -146,7 +143,6 @@ public class PortfolioService {
      */
     @Transactional
     public Portfolio recalculatePortfolioValue(Long portfolioId) {
-
         log.info("Recalculating value for portfolio ID: {}", portfolioId);
 
         Portfolio portfolio = getPortfolioWithPositions(portfolioId);
@@ -161,7 +157,6 @@ public class PortfolioService {
      */
     @Transactional
     public void deletePortfolio(Long id) {
-
         log.info("Deleting portfolio ID: {}", id);
 
         Portfolio portfolio = getPortfolioById(id);

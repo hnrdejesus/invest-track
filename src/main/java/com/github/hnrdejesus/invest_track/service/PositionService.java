@@ -3,6 +3,7 @@ package com.github.hnrdejesus.invest_track.service;
 import com.github.hnrdejesus.invest_track.domain.Asset;
 import com.github.hnrdejesus.invest_track.domain.Portfolio;
 import com.github.hnrdejesus.invest_track.domain.Position;
+import com.github.hnrdejesus.invest_track.exception.ResourceNotFoundException;
 import com.github.hnrdejesus.invest_track.repository.PositionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +44,8 @@ public class PositionService {
      */
     public Position getPosition(Long portfolioId, Long assetId) {
         return positionRepository.findByPortfolioIdAndAssetId(portfolioId, assetId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Position not found for portfolio " + portfolioId + " and asset " + assetId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Position not found for portfolio %d and asset %d", portfolioId, assetId)));
     }
 
     /**
@@ -57,7 +58,6 @@ public class PositionService {
      */
     @Transactional
     public Position buyAsset(Long portfolioId, Long assetId, BigDecimal quantity, BigDecimal price) {
-
         log.info("Buying {} units of asset {} for portfolio {}", quantity, assetId, portfolioId);
 
         validatePositiveAmount(quantity, "Quantity");
@@ -122,7 +122,6 @@ public class PositionService {
      */
     @Transactional
     public Position sellAsset(Long portfolioId, Long assetId, BigDecimal quantity, BigDecimal price) {
-
         log.info("Selling {} units of asset {} from portfolio {}", quantity, assetId, portfolioId);
 
         validatePositiveAmount(quantity, "Quantity");
@@ -204,7 +203,6 @@ public class PositionService {
     }
 
     private void validatePositiveAmount(BigDecimal amount, String fieldName) {
-
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException(fieldName + " must be positive");
         }

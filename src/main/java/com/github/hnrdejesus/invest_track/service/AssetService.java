@@ -2,6 +2,7 @@ package com.github.hnrdejesus.invest_track.service;
 
 import com.github.hnrdejesus.invest_track.domain.Asset;
 import com.github.hnrdejesus.invest_track.domain.AssetType;
+import com.github.hnrdejesus.invest_track.exception.ResourceNotFoundException;
 import com.github.hnrdejesus.invest_track.repository.AssetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,6 @@ public class AssetService {
      */
     @Transactional
     public Asset createAsset(String ticker, String name, AssetType type, String currency, String exchange) {
-
         log.info("Creating asset: {} ({})", ticker, type);
 
         if (assetRepository.findByTickerIgnoreCase(ticker).isPresent()) {
@@ -53,7 +53,7 @@ public class AssetService {
      */
     public Asset getAssetById(Long id) {
         return assetRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Asset not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Asset", id));
     }
 
     /**
@@ -61,7 +61,7 @@ public class AssetService {
      */
     public Asset getAssetByTicker(String ticker) {
         return assetRepository.findByTickerIgnoreCase(ticker)
-                .orElseThrow(() -> new IllegalArgumentException("Asset not found with ticker: " + ticker));
+                .orElseThrow(() -> new ResourceNotFoundException("Asset", "ticker", ticker));
     }
 
     /**
@@ -99,7 +99,6 @@ public class AssetService {
      */
     @Transactional
     public Asset updatePrice(Long assetId, BigDecimal newPrice) {
-
         log.debug("Updating price for asset ID {}: {}", assetId, newPrice);
 
         if (newPrice.compareTo(BigDecimal.ZERO) <= 0) {
@@ -118,7 +117,6 @@ public class AssetService {
      */
     @Transactional
     public Asset updateAssetInfo(Long id, String name, String exchange) {
-
         log.info("Updating asset ID: {}", id);
 
         Asset asset = getAssetById(id);
@@ -134,7 +132,6 @@ public class AssetService {
      */
     @Transactional
     public void deactivateAsset(Long id) {
-
         log.info("Deactivating asset ID: {}", id);
 
         Asset asset = getAssetById(id);
@@ -147,7 +144,6 @@ public class AssetService {
      */
     @Transactional
     public void reactivateAsset(Long id) {
-
         log.info("Reactivating asset ID: {}", id);
 
         Asset asset = getAssetById(id);
@@ -161,7 +157,6 @@ public class AssetService {
      */
     @Transactional
     public void bulkDeactivate(List<Long> assetIds) {
-
         log.info("Bulk deactivating {} assets", assetIds.size());
         assetRepository.updateActiveStatus(assetIds, false);
     }

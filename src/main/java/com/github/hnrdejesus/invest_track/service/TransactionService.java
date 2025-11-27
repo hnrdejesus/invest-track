@@ -4,6 +4,7 @@ import com.github.hnrdejesus.invest_track.domain.Asset;
 import com.github.hnrdejesus.invest_track.domain.Portfolio;
 import com.github.hnrdejesus.invest_track.domain.Transaction;
 import com.github.hnrdejesus.invest_track.domain.TransactionType;
+import com.github.hnrdejesus.invest_track.exception.ResourceNotFoundException;
 import com.github.hnrdejesus.invest_track.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -99,7 +100,6 @@ public class TransactionService {
      */
     @Transactional
     public Transaction recordDepositTransaction(Long portfolioId, BigDecimal amount, String notes) {
-
         log.info("Recording DEPOSIT transaction: {} to portfolio {}", amount, portfolioId);
 
         Portfolio portfolio = portfolioService.getPortfolioById(portfolioId);
@@ -120,7 +120,6 @@ public class TransactionService {
      */
     @Transactional
     public Transaction recordWithdrawalTransaction(Long portfolioId, BigDecimal amount, String notes) {
-
         log.info("Recording WITHDRAWAL transaction: {} from portfolio {}", amount, portfolioId);
 
         Portfolio portfolio = portfolioService.getPortfolioById(portfolioId);
@@ -226,6 +225,6 @@ public class TransactionService {
      */
     public Transaction getTransactionById(Long id) {
         return transactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Transaction not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction", id));
     }
 }
