@@ -2,8 +2,8 @@ package com.github.hnrdejesus.invest_track.service;
 
 import com.github.hnrdejesus.invest_track.domain.Portfolio;
 import com.github.hnrdejesus.invest_track.domain.Position;
-import com.github.hnrdejesus.invest_track.domain.Transaction;
 import com.github.hnrdejesus.invest_track.domain.TransactionType;
+import com.github.hnrdejesus.invest_track.dto.PortfolioMetricsDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -205,7 +205,7 @@ public class PortfolioMetricsService {
      * Calculates comprehensive portfolio metrics in a single call.
      * Optimized to avoid multiple database queries.
      */
-    public com.github.hnrdejesus.invest_track.dto.PortfolioMetricsDTO calculateMetrics(Long portfolioId) {
+    public PortfolioMetricsDTO calculateMetrics(Long portfolioId) {
         log.info("Calculating comprehensive metrics for portfolio: {}", portfolioId);
 
         Portfolio portfolio = portfolioService.getPortfolioById(portfolioId);
