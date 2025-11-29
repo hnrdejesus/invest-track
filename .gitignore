@@ -1,4 +1,3 @@
-
 ### Compiled class files ###
 *.class
 
@@ -54,6 +53,7 @@ Desktop.ini
 ### Application properties with secrets ###
 application-local.properties
 application-secrets.properties
+.env
 
 ### Angular ###
 /frontend/node_modules/
