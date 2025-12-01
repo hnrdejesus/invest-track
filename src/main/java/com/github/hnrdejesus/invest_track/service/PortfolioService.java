@@ -31,6 +31,11 @@ public class PortfolioService {
     public Portfolio createPortfolio(String name, String description, BigDecimal initialCash) {
         log.info("Creating portfolio: {}", name);
 
+        //Validations BEFORE any operation
+        if (initialCash == null || initialCash.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Initial cash must be positive");
+        }
+
         if (portfolioRepository.existsByNameIgnoreCase(name)) {
             throw new IllegalArgumentException("Portfolio with name '" + name + "' already exists");
         }
@@ -43,6 +48,7 @@ public class PortfolioService {
 
         Portfolio saved = portfolioRepository.save(portfolio);
         log.info("Portfolio created with ID: {}", saved.getId());
+
         return saved;
     }
 
