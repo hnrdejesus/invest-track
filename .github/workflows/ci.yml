@@ -54,14 +54,12 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: postgres
 
-      - name: Generate test report
+      - name: Upload test results
         if: always()
-        uses: dorny/test-reporter@v1
+        uses: actions/upload-artifact@v4
         with:
-          name: Test Results
-          path: target/surefire-reports/*.xml
-          reporter: java-junit
-          fail-on-error: true
+          name: test-results
+          path: target/surefire-reports/
 
       - name: Upload test coverage
         if: success()
