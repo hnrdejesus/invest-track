@@ -53,6 +53,8 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/investtrack_test
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: postgres
+          EXTERNAL_API_ALPHA_VANTAGE_BASE_URL: https://www.alphavantage.co
+          EXTERNAL_API_ALPHA_VANTAGE_API_KEY: demo
 
       - name: Upload test results
         if: always()
