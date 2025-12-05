@@ -1,0 +1,40 @@
+<mat-toolbar color="primary" class="navbar">
+  <button mat-button routerLink="/" class="logo">
+    <mat-icon>trending_up</mat-icon>
+    <span>InvestTrack</span>
+  </button>
+
+  <span class="spacer"></span>
+
+  <button mat-button routerLink="/dashboard" routerLinkActive="active">
+    <mat-icon>dashboard</mat-icon>
+    Dashboard
+  </button>
+
+  <button mat-button routerLink="/portfolios" routerLinkActive="active">
+    <mat-icon>account_balance_wallet</mat-icon>
+    Portfolios
+  </button>
+
+  <button mat-button routerLink="/assets" routerLinkActive="active">
+    <mat-icon>business</mat-icon>
+    Assets
+  </button>
+
+  <button mat-button [matMenuTriggerFor]="analysisMenu">
+    <mat-icon>analytics</mat-icon>
+    Analysis
+    <mat-icon>arrow_drop_down</mat-icon>
+  </button>
+
+  <mat-menu #analysisMenu="matMenu">
+    <button mat-menu-item routerLink="/monte-carlo">
+      <mat-icon>casino</mat-icon>
+      Monte Carlo
+    </button>
+    <button mat-menu-item routerLink="/backtest">
+      <mat-icon>history</mat-icon>
+      Backtest
+    </button>
+  </mat-menu>
+</mat-toolbar>
