@@ -1,0 +1,149 @@
+<div class="monte-carlo-container">
+  <h1>Monte Carlo Simulation</h1>
+  <p class="subtitle">Probabilistic portfolio projections based on historical performance</p>
+
+  <div class="content-grid">
+    <mat-card class="simulation-form">
+      <mat-card-header>
+        <mat-card-title>Configuration</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="simulationForm" (ngSubmit)="runSimulation()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Portfolio</mat-label>
+            <mat-select formControlName="portfolioId" required>
+              <mat-option *ngFor="let portfolio of portfolios" [value]="portfolio.id">
+                {{ portfolio.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Iterations</mat-label>
+            <input matInput type="number" formControlName="iterations" required>
+            <mat-hint>Number of scenarios (1,000 - 100,000)</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Days to Project</mat-label>
+            <input matInput type="number" formControlName="days" required>
+            <mat-hint>Trading days (252 = 1 year)</mat-hint>
+          </mat-form-field>
+
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="simulationForm.invalid || running"
+            class="full-width">
+            <mat-spinner *ngIf="running" diameter="20"></mat-spinner>
+            <span *ngIf="!running">Run Simulation</span>
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <div *ngIf="result" class="results-section">
+      <div class="metrics-grid">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Expected Value</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-value">{{ result.expectedValue | currency }}</div>
+            <div class="metric-hint">Mean of all scenarios</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Best Case (95%)</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-value profit">{{ result.bestCase | currency }}</div>
+            <div class="metric-hint">95th percentile</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Worst Case (5%)</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-value loss">{{ result.worstCase | currency }}</div>
+            <div class="metric-hint">5th percentile</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Median Value</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-value">{{ result.medianValue | currency }}</div>
+            <div class="metric-hint">50th percentile</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Distribution Chart</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas #chartCanvas></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="additional-metrics">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Risk Analysis</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-row">
+              <span class="label">Probability of Loss:</span>
+              <span class="value loss">{{ formatPercentage(result.probabilityOfLoss) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="label">Probability of Doubling:</span>
+              <span class="value profit">{{ formatPercentage(result.probabilityOfDoubling) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="label">Historical Return:</span>
+              <span class="value">{{ formatPercentage(result.historicalReturn) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="label">Historical Volatility:</span>
+              <span class="value">{{ formatPercentage(result.historicalVolatility) }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Confidence Intervals</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="confidence-interval">
+              <h4>90% Confidence</h4>
+              <div class="interval-bar">
+                <span class="low">{{ result.percentile90Low | currency }}</span>
+                <span class="high">{{ result.percentile90High | currency }}</span>
+              </div>
+            </div>
+            <div class="confidence-interval">
+              <h4>50% Confidence</h4>
+              <div class="interval-bar">
+                <span class="low">{{ result.percentile50Low | currency }}</span>
+                <span class="high">{{ result.percentile50High | currency }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>
