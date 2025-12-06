@@ -1,1 +1,63 @@
-<p>asset-form works!</p>
+<div class="asset-form-container">
+  <div class="header">
+    <h1>{{ isEditMode ? 'Edit Asset' : 'New Asset' }}</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <mat-card *ngIf="!loading">
+    <mat-card-content>
+      <form [formGroup]="assetForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Ticker Symbol</mat-label>
+          <input matInput formControlName="ticker" placeholder="AAPL" required [readonly]="isEditMode">
+          <mat-hint *ngIf="!isEditMode">Stock symbol (will be converted to uppercase)</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Asset Name</mat-label>
+          <input matInput formControlName="name" placeholder="Apple Inc." required>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Asset Type</mat-label>
+          <mat-select formControlName="assetType" required [disabled]="isEditMode">
+            <mat-option *ngFor="let type of assetTypes" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Currency</mat-label>
+            <input matInput formControlName="currency" placeholder="USD" required [readonly]="isEditMode">
+            <mat-hint>ISO 4217 code (3 letters)</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Exchange</mat-label>
+            <input matInput formControlName="exchange" placeholder="NASDAQ">
+            <mat-hint>Optional</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-button type="button" routerLink="/assets">
+            Cancel
+          </button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="assetForm.invalid || submitting">
+            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+            <span *ngIf="!submitting">{{ isEditMode ? 'Update' : 'Create' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,1 +1,220 @@
-<p>backtest-form works!</p>
+<div class="backtest-container">
+  <h1>Backtest Trading Strategy</h1>
+  <p class="subtitle">Test your trading strategy on historical data</p>
+
+  <div class="content-grid">
+    <mat-card class="strategy-form">
+      <mat-card-header>
+        <mat-card-title>Strategy Configuration</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="backtestForm" (ngSubmit)="runBacktest()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Portfolio</mat-label>
+            <mat-select formControlName="portfolioId" required>
+              <mat-option *ngFor="let portfolio of portfolios" [value]="portfolio.id">
+                {{ portfolio.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Strategy Name</mat-label>
+            <input matInput formControlName="strategyName" placeholder="My Strategy" required>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Initial Capital</mat-label>
+            <input matInput type="number" formControlName="initialCapital" required>
+            <span matPrefix>$&nbsp;</span>
+          </mat-form-field>
+
+          <div class="form-section">
+            <h3>Trading Rules</h3>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Buy Threshold</mat-label>
+              <input matInput type="number" formControlName="buyThreshold" step="0.01">
+              <mat-hint>Buy when price drops (e.g., -0.05 = -5%)</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Sell Threshold</mat-label>
+              <input matInput type="number" formControlName="sellThreshold" step="0.01">
+              <mat-hint>Sell when price rises (e.g., 0.10 = 10%)</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Max Position Size</mat-label>
+              <input matInput type="number" formControlName="maxPositionSize" step="0.01">
+              <mat-hint>Max % of portfolio per position (0.30 = 30%)</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="form-section">
+            <h3>Risk Management (Optional)</h3>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Stop Loss</mat-label>
+              <input matInput type="number" formControlName="stopLoss" step="0.01">
+              <mat-hint>Exit when loss reaches (e.g., -0.15 = -15%)</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Take Profit</mat-label>
+              <input matInput type="number" formControlName="takeProfit" step="0.01">
+              <mat-hint>Exit when profit reaches (e.g., 0.25 = 25%)</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Days to Backtest</mat-label>
+            <input matInput type="number" formControlName="days" required>
+            <mat-hint>Trading days (252 = 1 year)</mat-hint>
+          </mat-form-field>
+
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="backtestForm.invalid || running"
+            class="full-width">
+            <mat-spinner *ngIf="running" diameter="20"></mat-spinner>
+            <span *ngIf="!running">Run Backtest</span>
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <div *ngIf="result" class="results-section">
+      <div class="performance-cards">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Total Return</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-value" [ngClass]="getReturnClass(result.totalReturn)">
+              {{ formatPercentage(result.totalReturnPercentage) }}
+            </div>
+            <div class="metric-hint">
+              {{ result.initialCapital | currency }} → {{ result.finalCapital | currency }}
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Sharpe Ratio</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-value">{{ result.sharpeRatio | number:'1.2-2' }}</div>
+            <div class="metric-hint">Risk-adjusted return</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Max Drawdown</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-value loss">{{ formatPercentage(result.maxDrawdown) }}</div>
+            <div class="metric-hint">Largest decline</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Win Rate</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metric-value">{{ formatPercentage(result.winRate) }}</div>
+            <div class="metric-hint">
+              {{ result.winningTrades }} / {{ result.totalTrades }} trades
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Portfolio Performance</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas #chartCanvas></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="detail-cards">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Trade Statistics</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-row">
+              <span class="label">Total Trades:</span>
+              <span class="value">{{ result.totalTrades }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="label">Winning Trades:</span>
+              <span class="value profit">{{ result.winningTrades }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="label">Losing Trades:</span>
+              <span class="value loss">{{ result.losingTrades }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="label">Average Win:</span>
+              <span class="value profit">{{ result.avgWin | currency }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="label">Average Loss:</span>
+              <span class="value loss">{{ result.avgLoss | currency }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="label">Profit Factor:</span>
+              <span class="value">{{ result.profitFactor | number:'1.2-2' }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Strategy vs Buy & Hold</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="comparison">
+              <div class="comparison-row">
+                <span class="label">Strategy Return:</span>
+                <span class="value" [ngClass]="getReturnClass(result.totalReturn)">
+                  {{ formatPercentage(result.totalReturnPercentage) }}
+                </span>
+              </div>
+              <div class="comparison-row">
+                <span class="label">Buy & Hold Return:</span>
+                <span class="value" [ngClass]="getReturnClass(result.buyAndHoldReturn)">
+                  {{ formatPercentage(result.buyAndHoldReturn) }}
+                </span>
+              </div>
+              <div class="comparison-row highlight">
+                <span class="label">Difference:</span>
+                <span class="value" [ngClass]="getReturnClass(result.strategyVsBuyAndHold)">
+                  {{ formatPercentage(result.strategyVsBuyAndHold) }}
+                </span>
+              </div>
+            </div>
+            <div class="verdict">
+              <p *ngIf="result.strategyVsBuyAndHold > 0" class="profit">
+                ✓ Strategy outperformed buy & hold
+              </p>
+              <p *ngIf="result.strategyVsBuyAndHold <= 0" class="loss">
+                ✗ Buy & hold performed better
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>
