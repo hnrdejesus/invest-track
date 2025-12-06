@@ -1,1 +1,60 @@
-<p>portfolio-form works!</p>
+<div class="portfolio-form-container">
+  <div class="header">
+    <h1>{{ isEditMode ? 'Edit Portfolio' : 'New Portfolio' }}</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <mat-card *ngIf="!loading">
+    <mat-card-content>
+      <form [formGroup]="portfolioForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Portfolio Name</mat-label>
+          <input matInput formControlName="name" placeholder="My Tech Portfolio" required>
+          <mat-error *ngIf="portfolioForm.get('name')?.invalid">
+            {{ getErrorMessage('name') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea 
+            matInput 
+            formControlName="description" 
+            placeholder="Optional description"
+            rows="3">
+          </textarea>
+          <mat-error *ngIf="portfolioForm.get('description')?.invalid">
+            {{ getErrorMessage('description') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field *ngIf="!isEditMode" appearance="outline" class="full-width">
+          <mat-label>Initial Cash</mat-label>
+          <input matInput type="number" formControlName="initialCash" placeholder="10000.00" required>
+          <span matPrefix>$&nbsp;</span>
+          <mat-error *ngIf="portfolioForm.get('initialCash')?.invalid">
+            {{ getErrorMessage('initialCash') }}
+          </mat-error>
+          <mat-hint>Starting cash amount for this portfolio</mat-hint>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-button type="button" routerLink="/portfolios">
+            Cancel
+          </button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="portfolioForm.invalid || submitting">
+            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+            <span *ngIf="!submitting">{{ isEditMode ? 'Update' : 'Create' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

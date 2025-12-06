@@ -1,0 +1,163 @@
+.portfolio-detail-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 48px;
+  }
+
+  .portfolio-content {
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+
+      .title-section {
+        h1 {
+          margin: 0 0 8px 0;
+          font-weight: 300;
+        }
+
+        .description {
+          margin: 0;
+          color: #666;
+        }
+      }
+
+      .action-buttons {
+        button mat-icon {
+          margin-right: 8px;
+        }
+      }
+    }
+
+    .overview-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+
+      mat-card {
+        mat-card-header {
+          margin-bottom: 12px;
+
+          mat-card-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+          }
+        }
+
+        .metric-value {
+          font-size: 24px;
+          font-weight: 500;
+
+          &.profit {
+            color: #4caf50;
+          }
+
+          &.loss {
+            color: #f44336;
+          }
+        }
+      }
+    }
+
+    mat-tab-group {
+      .tab-content {
+        padding: 24px 0;
+
+        .empty-state {
+          text-align: center;
+          padding: 48px 24px;
+
+          mat-icon {
+            font-size: 64px;
+            width: 64px;
+            height: 64px;
+            color: #ccc;
+            margin-bottom: 16px;
+          }
+
+          h3 {
+            font-weight: 300;
+            margin-bottom: 8px;
+          }
+
+          p {
+            color: #999;
+          }
+        }
+
+        .positions-table {
+          width: 100%;
+
+          .asset-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .asset-name {
+              font-size: 12px;
+              color: #999;
+            }
+          }
+
+          .profit {
+            color: #4caf50;
+          }
+
+          .loss {
+            color: #f44336;
+          }
+
+          .percentage {
+            font-size: 12px;
+            font-weight: 400;
+          }
+        }
+
+        .metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 16px;
+
+          mat-card {
+            mat-card-header {
+              margin-bottom: 16px;
+
+              mat-card-title {
+                font-size: 14px;
+                font-weight: 500;
+                color: #666;
+              }
+            }
+
+            .metric-value {
+              font-size: 28px;
+              font-weight: 500;
+              margin-bottom: 4px;
+
+              &.profit {
+                color: #4caf50;
+              }
+
+              &.loss {
+                color: #f44336;
+              }
+            }
+
+            .metric-hint {
+              font-size: 12px;
+              color: #999;
+            }
+          }
+        }
+      }
+    }
+  }
+}
