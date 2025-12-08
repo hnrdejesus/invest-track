@@ -298,15 +298,18 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Should retrieve recent transactions")
-    void shouldRetrieveRecentTransactions() {
-        when(transactionRepository.findTop10ByOrderByTransactionDateDesc())
+    @DisplayName("Should retrieve recent transactions with assets eagerly loaded")
+    void shouldRetrieveRecentTransactionsWithAssets() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(transactionRepository.findRecentTransactionsWithAssets(pageable))
                 .thenReturn(Arrays.asList(buyTransaction, sellTransaction));
 
         List<Transaction> result = transactionService.getRecentTransactions();
 
         assertThat(result).hasSize(2);
         assertThat(result).contains(buyTransaction, sellTransaction);
+        // Eager loading prevents N+1 queries when accessing asset details
+        verify(transactionRepository).findRecentTransactionsWithAssets(any(Pageable.class));
     }
 
     @Test

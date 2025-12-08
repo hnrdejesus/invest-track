@@ -20,6 +20,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.when;
 
 /**
@@ -48,6 +49,8 @@ class MonteCarloServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(monteCarloService, "defaultIterations", 1000);
+        ReflectionTestUtils.setField(monteCarloService, "defaultVolatility", 0.01);
+        ReflectionTestUtils.setField(monteCarloService, "defaultReturn", 0.0003);
 
         testPortfolio = new Portfolio();
         testPortfolio.setId(1L);
@@ -124,6 +127,56 @@ class MonteCarloServiceTest {
         assertThatThrownBy(() -> monteCarloService.runSimulation(1L, 100, 30))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no positions to simulate");
+    }
+
+    @Test
+    @DisplayName("Should use default volatility when historical data is zero")
+    void shouldUseDefaultVolatilityWhenZero() {
+        when(portfolioService.getPortfolioById(1L)).thenReturn(testPortfolio);
+        when(positionService.getPortfolioPositions(1L)).thenReturn(Arrays.asList(testPosition));
+        when(metricsService.calculateVolatility(1L)).thenReturn(BigDecimal.ZERO);
+        when(metricsService.calculateTotalReturn(1L)).thenReturn(BigDecimal.ZERO);
+
+        MonteCarloSimulationDTO result = monteCarloService.runSimulation(1L, 100, 30);
+
+        assertThat(result).isNotNull();
+        // Fallback to configured default when historical data unavailable
+        assertThat(result.getHistoricalVolatility()).isGreaterThan(0.0);
+    }
+
+    @Test
+    @DisplayName("Should use default return when historical data is zero")
+    void shouldUseDefaultReturnWhenZero() {
+        when(portfolioService.getPortfolioById(1L)).thenReturn(testPortfolio);
+        when(positionService.getPortfolioPositions(1L)).thenReturn(Arrays.asList(testPosition));
+        when(metricsService.calculateVolatility(1L)).thenReturn(new BigDecimal("0.15"));
+        when(metricsService.calculateTotalReturn(1L)).thenReturn(BigDecimal.ZERO);
+
+        MonteCarloSimulationDTO result = monteCarloService.runSimulation(1L, 100, 30);
+
+        assertThat(result).isNotNull();
+        // Fallback to configured default when historical data unavailable
+        assertThat(result.getHistoricalReturn()).isGreaterThan(0.0);
+    }
+
+    @Test
+    @DisplayName("Should use historical data when available")
+    void shouldUseHistoricalDataWhenAvailable() {
+        when(portfolioService.getPortfolioById(1L)).thenReturn(testPortfolio);
+        when(positionService.getPortfolioPositions(1L)).thenReturn(Arrays.asList(testPosition));
+
+        BigDecimal historicalVol = new BigDecimal("0.15");
+        BigDecimal historicalReturn = new BigDecimal("0.08");
+
+        when(metricsService.calculateVolatility(1L)).thenReturn(historicalVol);
+        when(metricsService.calculateTotalReturn(1L)).thenReturn(historicalReturn);
+
+        MonteCarloSimulationDTO result = monteCarloService.runSimulation(1L, 100, 30);
+
+        // Annual return converted to daily (252 trading days)
+        double dailyReturn = historicalReturn.doubleValue() / 252;
+        assertThat(result.getHistoricalReturn()).isCloseTo(dailyReturn, within(0.0001));
+        assertThat(result.getHistoricalVolatility()).isEqualTo(historicalVol.doubleValue());
     }
 
     @Test

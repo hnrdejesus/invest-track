@@ -117,14 +117,14 @@ class PortfolioServiceTest {
     }
 
     @Test
-    @DisplayName("Should get all portfolios")
-    void shouldGetAllPortfolios() {
+    @DisplayName("Should get all portfolios with positions eagerly loaded")
+    void shouldGetAllPortfoliosWithPositions() {
         Portfolio portfolio2 = new Portfolio();
         portfolio2.setId(2L);
         portfolio2.setName("Value Portfolio");
         portfolio2.setAvailableCash(new BigDecimal("5000.00"));
 
-        when(portfolioRepository.findAllByOrderByCreatedAtDesc())
+        when(portfolioRepository.findAllWithPositionsOrderByCreatedAtDesc())
                 .thenReturn(Arrays.asList(testPortfolio, portfolio2));
 
         List<Portfolio> result = portfolioService.getAllPortfolios();
@@ -133,7 +133,8 @@ class PortfolioServiceTest {
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getName()).isEqualTo("Tech Portfolio");
         assertThat(result.get(1).getName()).isEqualTo("Value Portfolio");
-        verify(portfolioRepository).findAllByOrderByCreatedAtDesc();
+        // Eager loading prevents N+1 queries when accessing positions
+        verify(portfolioRepository).findAllWithPositionsOrderByCreatedAtDesc();
     }
 
     @Test
@@ -214,14 +215,17 @@ class PortfolioServiceTest {
     }
 
     @Test
-    @DisplayName("Should delete portfolio successfully")
-    void shouldDeletePortfolio() {
+    @DisplayName("Should delete portfolio with cascade to positions and transactions")
+    void shouldDeletePortfolioWithCascade() {
         Long portfolioId = 1L;
-        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(testPortfolio));
+        when(portfolioRepository.findByIdWithPositions(portfolioId))
+                .thenReturn(Optional.of(testPortfolio));
         doNothing().when(portfolioRepository).delete(testPortfolio);
 
         portfolioService.deletePortfolio(portfolioId);
 
+        // Fetch with positions to initialize collections before cascade delete
+        verify(portfolioRepository).findByIdWithPositions(portfolioId);
         verify(portfolioRepository).delete(testPortfolio);
     }
 }
