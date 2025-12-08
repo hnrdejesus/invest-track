@@ -80,7 +80,7 @@ public class PortfolioController {
     @GetMapping("/{id}")
     @Operation(summary = "Get portfolio", description = "Retrieves portfolio by ID")
     public ResponseEntity<PortfolioDTO> getPortfolioById(@PathVariable Long id) {
-        Portfolio portfolio = portfolioService.getPortfolioById(id);
+        Portfolio portfolio = portfolioService.getPortfolioWithPositions(id);
         return ResponseEntity.ok(mapper.toPortfolioDTO(portfolio));
     }
 

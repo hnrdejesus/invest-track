@@ -74,7 +74,7 @@ public class PortfolioService {
      * Lists all portfolios ordered by creation date.
      */
     public List<Portfolio> getAllPortfolios() {
-        return portfolioRepository.findAllByOrderByCreatedAtDesc();
+        return portfolioRepository.findAllWithPositionsOrderByCreatedAtDesc();
     }
 
     /**
@@ -165,7 +165,7 @@ public class PortfolioService {
     public void deletePortfolio(Long id) {
         log.info("Deleting portfolio ID: {}", id);
 
-        Portfolio portfolio = getPortfolioById(id);
+        Portfolio portfolio = getPortfolioWithPositions(id);
         portfolioRepository.delete(portfolio);
 
         log.info("Portfolio deleted successfully");

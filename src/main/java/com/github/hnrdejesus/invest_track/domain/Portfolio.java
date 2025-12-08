@@ -62,6 +62,14 @@ public class Portfolio extends BaseEntity {
     private List<Position> positions = new ArrayList<>();
 
     /**
+     * Transaction history uses CascadeType.ALL and orphanRemoval for lifecycle management.
+     * Deleting portfolio cascades to transactions; removing from list triggers deletion.
+     * mappedBy indicates Transaction owns the foreign key (avoids duplicate FK columns).
+     */
+    @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> transactions = new ArrayList<>();
+
+    /**
      * Maintains bidirectional sync when adding positions.
      * Essential for JPA consistency in @OneToMany relationships.
      */

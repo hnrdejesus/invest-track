@@ -50,4 +50,7 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
      */
     @Query("SELECT p FROM Portfolio p WHERE p.totalValue > :minValue ORDER BY p.totalValue DESC")
     List<Portfolio> findPortfoliosAboveValue(@Param("minValue") java.math.BigDecimal minValue);
+
+    @Query("SELECT p FROM Portfolio p LEFT JOIN FETCH p.positions ORDER BY p.createdAt DESC")
+    List<Portfolio> findAllWithPositionsOrderByCreatedAtDesc();
 }
