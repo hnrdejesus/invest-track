@@ -37,6 +37,12 @@ public class MonteCarloService {
     @Value("${app.monte-carlo.default-iterations:10000}")
     private int defaultIterations;
 
+    @Value("${app.monte-carlo.default-volatility:0.01}")
+    private double defaultVolatility;
+
+    @Value("${app.monte-carlo.default-return:0.0003}")
+    private double defaultReturn;
+
     private final Random random = new Random();
 
     /**
@@ -68,8 +74,9 @@ public class MonteCarloService {
         BigDecimal averageReturn = metricsService.calculateTotalReturn(portfolioId)
                 .divide(BigDecimal.valueOf(252), 6, RoundingMode.HALF_UP); // Daily return
 
-        double dailyReturn = averageReturn.doubleValue();
-        double dailyVolatility = volatility.doubleValue();
+        // Apply default values if insufficient historical data
+        double dailyReturn = getReturnOrDefault(averageReturn);
+        double dailyVolatility = getVolatilityOrDefault(volatility);
 
         // Run simulations
         List<BigDecimal> simulationResults = new ArrayList<>();
@@ -86,7 +93,44 @@ public class MonteCarloService {
     }
 
     /**
+     * Returns historical volatility or default market assumption if insufficient data.
+     * Default: 1% daily volatility (approximately 15.8% annualized).
+     *
+     * @param volatility Calculated historical volatility
+     * @return Volatility value to use in simulation
+     */
+    private double getVolatilityOrDefault(BigDecimal volatility) {
+        if (volatility.compareTo(BigDecimal.ZERO) == 0) {
+            log.warn("Insufficient historical data for volatility calculation. " +
+                    "Using default market assumption: {}% daily volatility", defaultVolatility * 100);
+            return defaultVolatility;
+        }
+        return volatility.doubleValue();
+    }
+
+    /**
+     * Returns historical return or default market assumption if insufficient data.
+     * Default: 0.03% daily return (approximately 7.8% annualized).
+     *
+     * @param averageReturn Calculated historical return
+     * @return Return value to use in simulation
+     */
+    private double getReturnOrDefault(BigDecimal averageReturn) {
+        if (averageReturn.compareTo(BigDecimal.ZERO) == 0) {
+            log.warn("Insufficient historical data for return calculation. " +
+                    "Using default market assumption: {}% daily return", defaultReturn * 100);
+            return defaultReturn;
+        }
+        return averageReturn.doubleValue();
+    }
+
+    /**
      * Simulates one possible scenario using Geometric Brownian Motion.
+     *
+     * @param initialValue Starting portfolio value
+     * @param days Number of days to simulate
+     * @param dist Normal distribution for random returns
+     * @return Final simulated portfolio value
      */
     private BigDecimal simulateScenario(BigDecimal initialValue, int days, NormalDistribution dist) {
         BigDecimal currentValue = initialValue;
@@ -102,6 +146,15 @@ public class MonteCarloService {
 
     /**
      * Builds DTO with statistical analysis of simulation results.
+     *
+     * @param portfolioId Portfolio identifier
+     * @param iterations Number of simulations run
+     * @param days Days projected
+     * @param initialValue Starting portfolio value
+     * @param results All simulation outcomes
+     * @param dailyReturn Daily return used
+     * @param dailyVolatility Daily volatility used
+     * @return Complete simulation results with statistics
      */
     private MonteCarloSimulationDTO buildSimulationDTO(
             Long portfolioId,
