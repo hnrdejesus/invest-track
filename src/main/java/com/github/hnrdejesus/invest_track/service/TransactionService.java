@@ -9,6 +9,7 @@ import com.github.hnrdejesus.invest_track.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -190,10 +191,11 @@ public class TransactionService {
 
     /**
      * Gets recent transactions across all portfolios.
-     * Dashboard activity feed.
+     * Dashboard activity feed with eager-loaded relationships to avoid LazyInitializationException.
      */
     public List<Transaction> getRecentTransactions() {
-        return transactionRepository.findTop10ByOrderByTransactionDateDesc();
+        Pageable pageable = PageRequest.of(0, 10);
+        return transactionRepository.findRecentTransactionsWithAssets(pageable);
     }
 
     /**

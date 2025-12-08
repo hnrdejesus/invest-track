@@ -30,18 +30,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Page<Transaction> findByPortfolioIdOrderByTransactionDateDesc(Long portfolioId, Pageable pageable);
 
     /**
-     * Finds all transactions for specific asset across all portfolios.
-     * Useful for asset history analysis.
-     */
-    List<Transaction> findByAssetIdOrderByTransactionDateDesc(Long assetId);
-
-    /**
-     * Finds transactions by type and portfolio.
-     * Example: Get all BUY transactions for a portfolio.
-     */
-    List<Transaction> findByPortfolioIdAndType(Long portfolioId, TransactionType type);
-
-    /**
      * Finds transactions within date range for portfolio.
      * Useful for monthly/yearly reports and tax calculations.
      */
@@ -68,12 +56,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     );
 
     /**
-     * Finds recent transactions across all portfolios.
-     * Useful for dashboard activity feed.
-     */
-    List<Transaction> findTop10ByOrderByTransactionDateDesc();
-
-    /**
      * Calculates total fees paid in portfolio.
      * Helps track trading costs.
      */
@@ -98,4 +80,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
      * Dashboard statistics (e.g., "15 buy operations this month").
      */
     long countByPortfolioIdAndType(Long portfolioId, TransactionType type);
+
+    /**
+     * Fetches recent transactions with eager-loaded asset relationships.
+     * Prevents LazyInitializationException when converting to DTOs.
+     * Uses LEFT JOIN FETCH to handle transactions without assets (DEPOSIT/WITHDRAWAL).
+     *
+     * @param pageable Pagination configuration (use PageRequest.of(0, 10) for top 10)
+     * @return List of transactions with assets preloaded
+     */
+    @Query("SELECT t FROM Transaction t " +
+            "LEFT JOIN FETCH t.asset " +
+            "LEFT JOIN FETCH t.portfolio " +
+            "ORDER BY t.transactionDate DESC")
+    List<Transaction> findRecentTransactionsWithAssets(Pageable pageable);
+
 }
